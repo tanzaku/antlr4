@@ -293,6 +293,45 @@ func (a *ArrayPredictionContext) getReturnState(index int) int {
 	return a.returnStates[index]
 }
 
+func equalPredictionContextSlices(a []PredictionContext, b []PredictionContext) bool {
+	if (a == nil) != (b == nil) {
+		return false
+	}
+
+	if len(a) != len(b) {
+		return false
+	}
+
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+		if !a[i].equals(b[i]) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func equalIntSlices(a []int, b []int) bool {
+	if (a == nil) != (b == nil) {
+		return false
+	}
+
+	if len(a) != len(b) {
+		return false
+	}
+
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+
+	return true
+}
+
 func (a *ArrayPredictionContext) equals(other PredictionContext) bool {
 	if _, ok := other.(*ArrayPredictionContext); !ok {
 		return false
@@ -300,7 +339,8 @@ func (a *ArrayPredictionContext) equals(other PredictionContext) bool {
 		return false // can't be same if hash is different
 	} else {
 		otherP := other.(*ArrayPredictionContext)
-		return &a.returnStates == &otherP.returnStates && &a.parents == &otherP.parents
+		// return &a.returnStates == &otherP.returnStates && &a.parents == &otherP.parents
+		return equalIntSlices(a.returnStates, otherP.returnStates) && equalPredictionContextSlices(a.parents, otherP.parents)
 	}
 }
 
@@ -315,7 +355,7 @@ func (a *ArrayPredictionContext) hash() int {
 		h = murmurUpdate(h, r)
 	}
 
-	return murmurFinish(h, 2 * len(a.parents))
+	return murmurFinish(h, 2*len(a.parents))
 }
 
 func (a *ArrayPredictionContext) String() string {
